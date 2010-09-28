@@ -99,11 +99,11 @@ public class FloorView extends View {
 			actor.drawMe(canvas);
 			if (actor.equals(this.sweeper)) {
 				Sweeper sweep = (Sweeper)actor;
-				sweep.x += this.sweeperVelocity;
+				sweep.x += sweep.velocity;
 				// move the sweeper
-				if (sweep.x < 0) {
+				if (actor.x < 0) {
 					sweep.velocity = 1;
-				} else if  (actor.x > this.width) {
+				} else if  (actor.x > getWidth()) {
 					sweep.velocity = -1;
 				}
 

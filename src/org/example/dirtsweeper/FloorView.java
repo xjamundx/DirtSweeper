@@ -97,19 +97,16 @@ public class FloorView extends View {
 		for (Actor actor : actors) {
 			actor.moveMe();
 			actor.drawMe(canvas);
-			if (actor.equals(this.sweeper)) {
-				Sweeper sweep = (Sweeper)actor;
-				sweep.x += sweep.velocity;
-				// move the sweeper
-				if (actor.x < 0) {
-					sweep.velocity = 1;
-				} else if  (actor.x > getWidth()) {
-					sweep.velocity = -1;
-				}
-
-			}
 		}
-		
+
+		// move the sweeper
+		this.sweeper.x += this.sweeper.velocity;
+		if (this.sweeper.x < 0) {
+			this.sweeper.velocity = 1;
+		} else if  (this.sweeper.x > getWidth()) {
+			this.sweeper.velocity = -1;
+		}
+
 		// clear the canvas and restart
 		invalidate();
 	}

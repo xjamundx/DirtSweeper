@@ -2,6 +2,7 @@ package org.example.dirtsweeper;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.view.View;
 
 public class Actor {
 
@@ -30,7 +31,7 @@ public class Actor {
 		c.drawCircle(this.x, this.y, this.radius, this.skin);
 	}
 	
-	public void moveMe() {
+	public void moveMe(View view, float accelX, float accelY) {
 		// you need to over-ride this one yourself suckas
 	}
 

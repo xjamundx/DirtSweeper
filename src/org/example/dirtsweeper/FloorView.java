@@ -1,5 +1,6 @@
 package org.example.dirtsweeper;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -9,43 +10,67 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
-
 import java.util.ArrayList;
 import java.util.Random;
 import android.view.animation.AnimationUtils;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorListener;
+import android.hardware.SensorManager;
 
-public class FloorView extends View {
+public class FloorView extends View { // implements SensorEventListener {
 	private static final String TAG = "DirtSweeper";
 	private final Game game;
 	private float width;
 	private float height;
-	private float sweeperX;
-	private float sweeperY;
-	private float sweeperWidth;
-	private float sweeperVelocity;
 	private Sweeper sweeper;
 	private ArrayList<Actor> actors;
 	private int selX;
 	private int selY;
-	private final Rect selRect = new Rect();
+    // sensor manager used to control the accelerometer sensor.
+
+	
+    private final Rect selRect = new Rect();
 	private Random rand;
+
+	private SensorManager mgr;
+    private float accelX = 0;
+    private float accelY = 0;
+    // http://code.google.com/android/reference/android/hardware/SensorManager.html#SENSOR_ACCELEROMETER
+    // for an explanation on the values reported by SENSOR_ACCELEROMETER.
+	private final SensorEventListener accelerometer = new SensorEventListener() {
+
+		// we don't really care for this example, but
+        // reports when the accuracy of sensor has change
+		public void onAccuracyChanged(Sensor sensor, int accuracy) {
+	        // SENSOR_STATUS_ACCURACY_HIGH = 3
+	        // SENSOR_STATUS_ACCURACY_LOW = 1
+	        // SENSOR_STATUS_ACCURACY_MEDIUM = 2
+	        // SENSOR_STATUS_UNRELIABLE = 0 //calibration required.		
+		}
+
+		public void onSensorChanged(SensorEvent event) {
+			// TODO Auto-generated method stub
+        	accelX = event.values[0];
+        	accelY = event.values[1];
+		}
+    };
 	
 	public FloorView(Context context) {
 		super(context);
 		this.game = (Game) context;
 		setFocusable(true);
 		setFocusableInTouchMode(true);
-		this.rand = new Random();
+		rand = new Random();
+        // setup accelerometer sensor manager.
+        mgr = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
 	}
 	
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		width = w / 5f;
 		height = h / 5f;
-		this.sweeperX = width*2.5f;
-		this.sweeperY = height*2.5f;
-		this.sweeperWidth = width/3f;
-		this.sweeperVelocity = 1;
 		float circleWidth = width/3f;
 		getRect(selX, selY, selRect);
 		Log.d(TAG, "onSizeChanged: width " + width + ", height " + height);
@@ -60,7 +85,7 @@ public class FloorView extends View {
 		}
 		this.actors.add(new Mouse(width*4.5f, height*4.5f, circleWidth, Color.GRAY));
 		this.actors.add(new Mouse(width*2.5f, height*1.5f, circleWidth, Color.GRAY));
-		this.sweeper = new Sweeper(width*2.5f, height*2.5f, circleWidth, Color.BLACK, 1);
+		this.sweeper = new Sweeper(width*2.5f, height*2.5f, circleWidth, Color.BLACK);
 		this.actors.add(this.sweeper);
 	}
 	
@@ -93,23 +118,27 @@ public class FloorView extends View {
 			canvas.drawLine(i * width + 1, 0, i * width + 1, getHeight(), hilite);
 		}
 		
-		// loop through the actors and draw them
+		// loop through the actors and draw them 
 		for (Actor actor : actors) {
-			actor.moveMe();
 			actor.drawMe(canvas);
 		}
 
-		// move the sweeper
-		this.sweeper.x += this.sweeper.velocity;
-		if (this.sweeper.x < 0) {
-			this.sweeper.velocity = 1;
-		} else if  (this.sweeper.x > getWidth()) {
-			this.sweeper.velocity = -1;
+		// loop through the actors and move them 
+		for (Actor actor : actors) {
+			actor.moveMe(this, accelX, accelY);
 		}
 
 		// clear the canvas and restart
 		invalidate();
 	}
 
+	public void onResume() {
+		mgr.registerListener(accelerometer, mgr.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_GAME);
+	}
+
+	public void onPause() {
+		mgr.unregisterListener(accelerometer);
+	}
+	
 }
 

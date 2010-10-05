@@ -1,11 +1,14 @@
 package org.example.dirtsweeper;
 
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.widget.Toast;
+
 
 public class Game extends Activity {
 	private static final String TAG = "FloorSweeper";
@@ -15,7 +18,7 @@ public class Game extends Activity {
 	public static final int DIFFICULTY_MEDIUM = 1;
 	public static final int DIFFICULTY_HARD = 2;
 	
-	private int floor[] = new int[9 * 9];
+	private int floor[] = new int[5 * 5];
 	
 	private FloorView floorView;
 	

@@ -18,4 +18,12 @@ DirtSweeper is not a mine sweeper clone!
 It was invented by Rain\'s very own Jamund Xcot Ferguson.
 It was inspired by his wife.
 </string>
+	<string name="settings_label">Settings...</string>
+	<string name="settings_title">DirtSweeper Settings</string>
+	<string name="settings_shortcut">DirtSweeper Settings</string>
+	<string name="sound_title">Sound FX</string>
+	<string name="sound_summary">Play sound FX</string>
+	<string name="color_title">Colors</string>
+	<string name="color_summary">Invert colors</string>
+
 </resources>

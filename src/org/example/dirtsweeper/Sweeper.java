@@ -52,16 +52,16 @@ public class Sweeper extends Actor {
 	public void moveMe(View view, float accelX, float accelY) {
 		this.accelerate(accelX, accelY);
 		
-		int dwidth = view.getWidth();
-		int dheight = view.getHeight();
+		int width = view.getWidth();
+		int height = view.getHeight();
 		float dx = this.x + this.velocityX;
 		float dy = this.y + this.velocityY;
 
-		if (dx > dwidth || dwidth < 0) {
+		if (dx > width || dx < 0) {
 			dx = this.x;
 		}
 		
-		if (dy > dheight || dheight < 0) {
+		if (dy > height || dy < 0) {
 			dy = this.y;
 		}
 				

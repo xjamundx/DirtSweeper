@@ -50,26 +50,25 @@ public class Sweeper extends Actor {
 	// into the wall
 	@Override
 	public void moveMe(View view, float accelX, float accelY) {
-		
 		this.accelerate(accelX, accelY);
-		int width = view.getWidth();
-		int height = view.getHeight();
-		float x = this.x;
-		float y = this.y;
-		x += accelX;
-		y += accelY;
 		
-		if (width > x || width < 0) {
-			return;
+		int dwidth = view.getWidth();
+		int dheight = view.getHeight();
+		float dx = this.x + this.velocityX;
+		float dy = this.y + this.velocityY;
+
+		if (dx > dwidth || dwidth < 0) {
+			dx = this.x;
 		}
 		
-		if (height > y || height < 0) {
-			return;
+		if (dy > dheight || dheight < 0) {
+			dy = this.y;
 		}
-		
-		this.x = x;
-		this.y = y;
-		
+				
+		this.x = dx;
+		this.y = dy;
+
+		/*
 		// use the float array
 		float[] location = new float[2];
 		location[0] = this.x;
@@ -77,18 +76,13 @@ public class Sweeper extends Actor {
 		coordinatesf.add(location);
 		
 		coordinates.add(new Coordinate(x,y));
-
+		*/
 	}
 	
 	// accelerate
 	public void accelerate(float accelX, float accelY) {
-		if (accelX == accelY) {
-			return;
-		} else if (accelX > accelY) {
-			this.velocityX += accelX;
-		} else {
-			this.velocityY += accelY;
-		}
+		this.velocityX = -accelX;
+		this.velocityY = accelY;
 	}
 	
 	public ArrayList<float[]> getCoords() {

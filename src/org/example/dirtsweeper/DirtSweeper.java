@@ -8,6 +8,7 @@ import android.view.View.OnClickListener;
 import android.util.Log;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.res.Configuration;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -35,6 +36,11 @@ public class DirtSweeper extends Activity implements OnClickListener {
     	inflater.inflate(R.menu.menu, menu);
     	return true;
     }
+    
+//    @Override
+  //  public void onConfigurationChanged(Configuration newConfig){        
+    //    super.onConfigurationChanged(newConfig);
+      // }
     
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

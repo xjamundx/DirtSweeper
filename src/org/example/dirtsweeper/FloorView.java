@@ -35,8 +35,8 @@ public class FloorView extends View { // implements SensorEventListener {
 	private Random rand;
 
 	private SensorManager mgr;
-    private float accelX = 0;
-    private float accelY = 0;
+    private float accelX = 0.0f;
+    private float accelY = 0.0f;
     // http://code.google.com/android/reference/android/hardware/SensorManager.html#SENSOR_ACCELEROMETER
     // for an explanation on the values reported by SENSOR_ACCELEROMETER.
 	private final SensorEventListener accelerometer = new SensorEventListener() {
@@ -54,6 +54,7 @@ public class FloorView extends View { // implements SensorEventListener {
 			// TODO Auto-generated method stub
         	accelX = event.values[0];
         	accelY = event.values[1];
+    		Log.d(TAG, "onSensorChanged: x " + accelX + ", y " + accelY);
 		}
     };
 	
@@ -63,8 +64,8 @@ public class FloorView extends View { // implements SensorEventListener {
 		setFocusable(true);
 		setFocusableInTouchMode(true);
 		rand = new Random();
-        // setup accelerometer sensor manager.
         mgr = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
+        registerListener();
 	}
 	
 	@Override
@@ -131,13 +132,22 @@ public class FloorView extends View { // implements SensorEventListener {
 		// clear the canvas and restart
 		invalidate();
 	}
-
-	public void onResume() {
+	
+	public void registerListener() {
 		mgr.registerListener(accelerometer, mgr.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_GAME);
 	}
 
-	public void onPause() {
+	public void unregisterListener() {
 		mgr.unregisterListener(accelerometer);
+		
+	}
+	
+	public void onResume() {
+		registerListener();
+	}
+
+	public void onPause() {
+		unregisterListener();
 	}
 	
 }

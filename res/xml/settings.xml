@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+	xmlns:android="http://schemas.android.com/apk/res/android">
+	<CheckBoxPreference
+		android:title="@string/sound_title"	
+		android:summary="@string/sound_summary"
+		android:defaultValue="true" android:key="sound"/>
+	<CheckBoxPreference
+		android:title="@string/color_title"	
+		android:summary="@string/color_summary"
+		android:defaultValue="false" android:key="color"/>
+</PreferenceScreen>

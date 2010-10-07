@@ -6,12 +6,18 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Color;
+import android.os.Handler;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.RejectedExecutionException;
+
 import android.view.animation.AnimationUtils;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -28,36 +34,36 @@ public class FloorView extends View { // implements SensorEventListener {
 	private ArrayList<Actor> actors;
 	private int selX;
 	private int selY;
-    // sensor manager used to control the accelerometer sensor.
-
-	
-    private final Rect selRect = new Rect();
 	private Random rand;
 
+    // sensor manager used to control the accelerometer sensor.
+	// event listener stuff
+    // http://code.google.com/android/reference/android/hardware/SensorManager.html#SENSOR_ACCELEROMETER
+    // for an explanation on the values reported by SENSOR_ACCELEROMETER.
 	private SensorManager mgr;
     private float accelX = 0.0f;
     private float accelY = 0.0f;
-    // http://code.google.com/android/reference/android/hardware/SensorManager.html#SENSOR_ACCELEROMETER
-    // for an explanation on the values reported by SENSOR_ACCELEROMETER.
 	private final SensorEventListener accelerometer = new SensorEventListener() {
 
-		// we don't really care for this example, but
-        // reports when the accuracy of sensor has change
 		public void onAccuracyChanged(Sensor sensor, int accuracy) {
-	        // SENSOR_STATUS_ACCURACY_HIGH = 3
-	        // SENSOR_STATUS_ACCURACY_LOW = 1
-	        // SENSOR_STATUS_ACCURACY_MEDIUM = 2
-	        // SENSOR_STATUS_UNRELIABLE = 0 //calibration required.		
+
 		}
 
 		public void onSensorChanged(SensorEvent event) {
-			// TODO Auto-generated method stub
         	accelX = event.values[0];
         	accelY = event.values[1];
     		Log.d(TAG, "onSensorChanged: x " + accelX + ", y " + accelY);
 		}
     };
 	
+    // web services stuff
+    // taken from hello android chapeter 7
+    private Handler guiThread;
+    private ExecutorService webServicesThread;
+    private Runnable updateTask;
+    // private Future sendCoordsPending;
+    
+    
 	public FloorView(Context context) {
 		super(context);
 		this.game = (Game) context;
@@ -73,7 +79,6 @@ public class FloorView extends View { // implements SensorEventListener {
 		width = w / 5f;
 		height = h / 5f;
 		float circleWidth = width/3f;
-		getRect(selX, selY, selRect);
 		Log.d(TAG, "onSizeChanged: width " + width + ", height " + height);
 		super.onSizeChanged(w, h, oldw, oldh);
 		this.actors = new ArrayList<Actor>();
@@ -150,5 +155,24 @@ public class FloorView extends View { // implements SensorEventListener {
 		unregisterListener();
 	}
 	
+	/*
+	private void initThreading() {
+		guiThread = new Handler();
+		webServicesThread = Executors.newSingleThreadExecutor();
+		updateTask = new Runnable() {
+			public void run() {
+				try {
+					WebServicesTask sendCoordsTask = new WebServicesTask(this, null, selX);
+					webServicesThread.submit(sendCoordsTask);
+				} catch (RejectedExecutionException e) {
+					
+					
+				}
+				
+				
+			}
+		};
+	}
+	*/
 }
 

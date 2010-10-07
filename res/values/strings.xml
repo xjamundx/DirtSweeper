@@ -12,6 +12,7 @@
     <string name="game_title">Game</string>
     <string name="no_moves_label">No moves</string>
     <string name="keypad_title">Keypad</string>
+    <string name="web_service_url">http://www.touchenabledweb.com/games/add</string>
 	<string name="about_title">About DirtSweeper</string>
 	<string name="about_text">\
 DirtSweeper is not a mine sweeper clone!

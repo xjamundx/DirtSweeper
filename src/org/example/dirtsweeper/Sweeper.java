@@ -1,46 +1,36 @@
 package org.example.dirtsweeper;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+
+import android.graphics.PointF;
+import android.os.AsyncTask;
+import android.util.Log;
 import android.view.View;
 
 public class Sweeper extends Actor {
 	public float velocityX;
 	public float velocityY;
-	private ArrayList<Coordinate> coordinates;
-	private ArrayList<float[]> coordinatesf;
-
-	class Coordinate {
-		private float x;
-		private float y;
-		private float location[] = new float[2];
-		
-		public Coordinate(float x, float y) {
-			this.y = y;
-			this.location[0] = x;
-			this.location[1] = y;
-		}
-		
-		public void setX(float x) {
-			this.x = x;
-			this.location[0] = x;
-		}
-		
-		public void setY(float y) {
-			this.y = y;
-			this.location[1] = y;
-		}
-			
-		public float[] getCoords() {
-			return location;
-			
-		}
-	}	
+	public ArrayList<PointF> coordinates;
+	public int gameID;
 	
 	public Sweeper(float x, float y, float radius, int color) {
 		super(x, y, radius, color);
 		this.velocityX = 0.0f;
 		this.velocityY = 0.0f;
+		this.coordinates = new ArrayList<PointF>();
+		this.gameID = 99;
 	}
 
 	// the move me method will actually work here.
@@ -67,16 +57,30 @@ public class Sweeper extends Actor {
 				
 		this.x = dx;
 		this.y = dy;
-
-		/*
-		// use the float array
-		float[] location = new float[2];
-		location[0] = this.x;
-		location[1] = this.y;
-		coordinatesf.add(location);
 		
-		coordinates.add(new Coordinate(x,y));
-		*/
+		Log.d("Sweeper", "size: " + this.coordinates.size());
+		synchronized(this.coordinates) {
+			this.coordinates.add(new PointF(this.x, this.y));
+			if (this.coordinates.size() > 75) {
+				 new WebServicesTask().execute(new GameFrame(gameID, coordinates));
+				 this.coordinates.clear();
+			}
+		}
+	}
+	
+	private class GameFrame {
+		public int gameID;
+		public ArrayList<PointF> coords;
+		
+		public GameFrame(int gameID, ArrayList<PointF> coords) {
+			this.coords = coords;
+			this.gameID = gameID;
+		}
+		
+	}
+	
+	public ArrayList<PointF> getCoords() {
+		return this.coordinates;
 	}
 	
 	// accelerate
@@ -84,9 +88,50 @@ public class Sweeper extends Actor {
 		this.velocityX = -accelX;
 		this.velocityY = accelY;
 	}
-	
-	public ArrayList<float[]> getCoords() {
-		return this.coordinatesf;
+
+	private class WebServicesTask extends AsyncTask<GameFrame, Integer, Long > {
+		
+		private static final String TAG = "WebServicesTask";
+		
+		@Override
+		protected Long doInBackground(GameFrame...frame) {
+			Log.d(TAG, "do it in the background");
+			boolean succcess = this.postData(frame[0].coords, frame[0].gameID);
+			return null;
+		} 
+
+		private boolean postData(ArrayList<PointF> myCoords, int myGameID) {
+			Log.d(TAG, "post, data");
+			
+		    // Create a new HttpClient and Post Header
+		    HttpClient httpclient = new DefaultHttpClient();
+		    HttpPost httppost = new HttpPost("http://www.touchenabledweb.com/games/add.json");
+		    try {
+		   
+		        // Add your data
+		        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+		        // nameValuePairs.add(new BasicNameValuePair("data[GameTimer][0][game_id]", String.valueOf(myGameID)));
+		        int i = 0;
+		        for (PointF p : myCoords) {
+			        nameValuePairs.add(new BasicNameValuePair("data[GameTimer]["+i+"][game_id]", String.valueOf(myGameID)));
+			        nameValuePairs.add(new BasicNameValuePair("data[GameTimer]["+i+"][x]", String.valueOf(p.x)));
+			        nameValuePairs.add(new BasicNameValuePair("data[GameTimer]["+i+"][y]", String.valueOf(p.y)));
+			        i++;
+		    	}
+		        httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+
+		        // Execute HTTP Post Request
+		        HttpResponse response = httpclient.execute(httppost);
+		        HttpEntity entity = response.getEntity();
+		        Log.d(TAG, "This is your response " + entity.getContent().toString());
+		    } catch (ClientProtocolException e) {
+		        Log.d(TAG, "This is your error ClientProtocol " + e.getLocalizedMessage());
+		    } catch (IOException e) {
+		    	e.printStackTrace();
+		        Log.d(TAG, "This is your IOException error " +  e.getLocalizedMessage());
+		    }
+		    
+		    return true;
+		}
 	}
-	
 }

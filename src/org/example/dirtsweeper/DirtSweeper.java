@@ -37,11 +37,6 @@ public class DirtSweeper extends Activity implements OnClickListener {
     	return true;
     }
     
-//    @Override
-  //  public void onConfigurationChanged(Configuration newConfig){        
-    //    super.onConfigurationChanged(newConfig);
-      // }
-    
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
     	switch (item.getItemId()) {
@@ -86,7 +81,5 @@ public class DirtSweeper extends Activity implements OnClickListener {
     	intent.putExtra(Game.KEY_DIFFICULTY, i);
     	startActivity(intent);
     }
-    
-    
 
 }

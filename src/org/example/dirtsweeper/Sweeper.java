@@ -69,8 +69,8 @@ public class Sweeper extends Actor {
 		Log.d("Sweeper", "size: " + this.coordinates.size());
 		synchronized(this.coordinates) {
 			this.coordinates.add(new PointF(this.x, this.y));
-			if (this.coordinates.size() > 75) {
-				 new WebServicesTask().execute(new GameFrame(gameID, coordinates));
+			if (this.coordinates.size() > 150) {
+				 new WebServicesTask().execute(new GameFrame(gameID, (ArrayList<PointF>) coordinates.clone()));
 				 this.coordinates.clear();
 			}
 		}
@@ -98,7 +98,7 @@ public class Sweeper extends Actor {
 	}
 
 	private class WebServicesTask extends AsyncTask<GameFrame, Integer, Long > {
-		
+
 		private static final String TAG = "WebServicesTask";
 		
 		@Override
@@ -118,21 +118,24 @@ public class Sweeper extends Actor {
 		   
 		        // Add your data
 		        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-		        nameValuePairs.add(new BasicNameValuePair("data[GameTimer][0][game_id]", String.valueOf(myFrame.gameID)));
-		        /*
-		        int i = 0;
-		        for (PointF p : myFrame.coords) {
-			        nameValuePairs.add(new BasicNameValuePair("data[GameTimer]["+i+"][game_id]", String.valueOf(myFrame.myGameID)));
-			        nameValuePairs.add(new BasicNameValuePair("data[GameTimer]["+i+"][x]", String.valueOf(myFrame.p.x)));
-			        nameValuePairs.add(new BasicNameValuePair("data[GameTimer]["+i+"][y]", String.valueOf(myFrame.p.y)));
-			        i++;
+		        nameValuePairs.add(new BasicNameValuePair("data[GameTimer][game_id]", String.valueOf(myFrame.gameID)));
+		        String xs = "";
+		        String ys = "";
+		        for (PointF p : myFrame.coords) {		        	
+			        xs += String.valueOf(p.x) + "|";
+			        ys += String.valueOf(p.y) + "|";
 		    	}
-		    	*/
+		        nameValuePairs.add(new BasicNameValuePair("data[GameTimer][xs]", xs));
+		        nameValuePairs.add(new BasicNameValuePair("data[GameTimer][ys]", ys));
+		        Log.d(TAG, "xs: " + xs);
+
 		        httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 		        
 		        // Execute HTTP Post Request
 		        HttpResponse response = httpclient.execute(httppost);
+		        Log.d(TAG, "RESPONSE: " + response.getEntity().getContent());
 		        BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF_8"));
+		        Log.d(TAG, "LINE: " + reader.readLine());
 		        StringBuilder builder = new StringBuilder();
 		        for (String line = null; (line = reader.readLine()) != null;) {
 		            builder.append(line).append("\n");
@@ -142,6 +145,7 @@ public class Sweeper extends Actor {
 		        try {
 					JSONArray finalResult = new JSONArray(tokener);
 				} catch (JSONException e) {
+			        Log.d(TAG, "This is your BROKEN (JSON)" + e.getMessage());
 					e.printStackTrace();
 				}
 		        Log.d(TAG, "This is your response (JSON)" + json);
@@ -150,7 +154,7 @@ public class Sweeper extends Actor {
 		        Log.d(TAG, "This is your error ClientProtocol " + e.getLocalizedMessage());
 		    } catch (IOException e) {
 		    	e.printStackTrace();
-		        Log.d(TAG, "This is your IOException error " +  e.getLocalizedMessage());
+		        Log.d(TAG, "Thi is your IOException error " +  e.getLocalizedMessage());
 		    }
 		    
 		    return true;

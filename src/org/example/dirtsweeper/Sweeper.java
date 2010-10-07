@@ -1,6 +1,9 @@
 package org.example.dirtsweeper;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +16,9 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONTokener;
 
 import android.graphics.PointF;
 import android.os.AsyncTask;
@@ -40,6 +46,8 @@ public class Sweeper extends Actor {
 	// into the wall
 	@Override
 	public void moveMe(View view, float accelX, float accelY) {
+		Log.d("Sweeper", "moveMe");
+
 		this.accelerate(accelX, accelY);
 		
 		int width = view.getWidth();
@@ -96,11 +104,11 @@ public class Sweeper extends Actor {
 		@Override
 		protected Long doInBackground(GameFrame...frame) {
 			Log.d(TAG, "do it in the background");
-			boolean succcess = this.postData(frame[0].coords, frame[0].gameID);
+			boolean succcess = this.postData(frame[0]);
 			return null;
 		} 
 
-		private boolean postData(ArrayList<PointF> myCoords, int myGameID) {
+		private boolean postData(GameFrame myFrame) {
 			Log.d(TAG, "post, data");
 			
 		    // Create a new HttpClient and Post Header
@@ -110,20 +118,34 @@ public class Sweeper extends Actor {
 		   
 		        // Add your data
 		        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-		        // nameValuePairs.add(new BasicNameValuePair("data[GameTimer][0][game_id]", String.valueOf(myGameID)));
+		        nameValuePairs.add(new BasicNameValuePair("data[GameTimer][0][game_id]", String.valueOf(myFrame.gameID)));
+		        /*
 		        int i = 0;
-		        for (PointF p : myCoords) {
-			        nameValuePairs.add(new BasicNameValuePair("data[GameTimer]["+i+"][game_id]", String.valueOf(myGameID)));
-			        nameValuePairs.add(new BasicNameValuePair("data[GameTimer]["+i+"][x]", String.valueOf(p.x)));
-			        nameValuePairs.add(new BasicNameValuePair("data[GameTimer]["+i+"][y]", String.valueOf(p.y)));
+		        for (PointF p : myFrame.coords) {
+			        nameValuePairs.add(new BasicNameValuePair("data[GameTimer]["+i+"][game_id]", String.valueOf(myFrame.myGameID)));
+			        nameValuePairs.add(new BasicNameValuePair("data[GameTimer]["+i+"][x]", String.valueOf(myFrame.p.x)));
+			        nameValuePairs.add(new BasicNameValuePair("data[GameTimer]["+i+"][y]", String.valueOf(myFrame.p.y)));
 			        i++;
 		    	}
+		    	*/
 		        httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-
+		        
 		        // Execute HTTP Post Request
 		        HttpResponse response = httpclient.execute(httppost);
-		        HttpEntity entity = response.getEntity();
-		        Log.d(TAG, "This is your response " + entity.getContent().toString());
+		        BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF_8"));
+		        StringBuilder builder = new StringBuilder();
+		        for (String line = null; (line = reader.readLine()) != null;) {
+		            builder.append(line).append("\n");
+		        }
+		        String json = builder.toString();
+		        JSONTokener tokener = new JSONTokener(json);
+		        try {
+					JSONArray finalResult = new JSONArray(tokener);
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+		        Log.d(TAG, "This is your response (JSON)" + json);
+		        Log.d(TAG, "This is your response " + response.getEntity().getContent().toString());
 		    } catch (ClientProtocolException e) {
 		        Log.d(TAG, "This is your error ClientProtocol " + e.getLocalizedMessage());
 		    } catch (IOException e) {

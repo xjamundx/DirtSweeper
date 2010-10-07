@@ -52,7 +52,7 @@ public class FloorView extends View { // implements SensorEventListener {
 		public void onSensorChanged(SensorEvent event) {
         	accelX = event.values[0];
         	accelY = event.values[1];
-    		Log.d(TAG, "onSensorChanged: x " + accelX + ", y " + accelY);
+    		// Log.d(TAG, "onSensorChanged: x " + accelX + ", y " + accelY);
 		}
     };
 	

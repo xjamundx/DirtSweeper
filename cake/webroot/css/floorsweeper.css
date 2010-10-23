@@ -1,0 +1,13 @@
+body {
+	text-align: center;
+}
+ul {
+	float: left;
+}
+header {
+	 display: none;
+}
+#floorSweeper {
+	margin: 50px auto;
+	background: green;
+}

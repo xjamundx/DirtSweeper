@@ -1,5 +1,26 @@
-DirtSweeper.
+DirtSweeper. Canvas / Android Mashup.
 
-Simple Android Game.
+This was originally going to be a simple Android game, but instead it became an excersize in JSON web services and the HTML5 Canvas tag.
 
-Awesome.
+We have a ball moving around the screen and every 125 frames we send its coordinates up to a server for playback
+
+Come and see the games that have already been played here:
+http://www.touchenabledweb.com/games/
+
+The server component for this project was written in CakePHP, MySQL and Javascript and can be found in the cake directory.
+
+The interesting files in the cake directory are the following:
+
+cake/app/config/schema.sql - database structure
+cake/app/controllers/games_controller.php - manages adding/watching games
+cake/app/views/games/index.ctp - display a list of games
+cake/app/views/games/watch.ctp - how to watch a game, contains the canvas
+cake/app/views/games/json/add_game.ctp - json response after adding a new game
+cake/app/views/games/json/add_times.ctp - json response after adding times
+cake/app/webroot/js/floorsweeper.js - main javascript file
+
+
+-----------------------------------
+Jamund Ferguson
+http://www.jamund.com
+http://www.twitter.com/xjamundx

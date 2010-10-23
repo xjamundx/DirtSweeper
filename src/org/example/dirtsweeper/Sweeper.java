@@ -26,18 +26,24 @@ import android.util.Log;
 import android.view.View;
 
 public class Sweeper extends Actor {
+	private final Boolean ACCELEROMETER = true;
 	public float velocityX;
 	public float velocityY;
+	public View floor;
 	public ArrayList<PointF> coordinates;
-	public int gameID;
+	private int gameID;
 	
-	public Sweeper(float x, float y, float radius, int color) {
+	public Sweeper(float x, float y, float radius, int color, View view) {
 		super(x, y, radius, color);
-		this.velocityX = 0.0f;
-		this.velocityY = 0.0f;
+		this.velocityX = 3.0f;
+		this.velocityY = 2.5f;
 		this.coordinates = new ArrayList<PointF>();
-		this.gameID = 99;
-	}
+		this.gameID = 0;
+		this.floor = view;
+		
+		// startGameTask will update the game ID
+		new NewGameTask().execute(this);
+	}	
 
 	// the move me method will actually work here.
 	// it's pretty straight forward. we figure out the
@@ -48,45 +54,46 @@ public class Sweeper extends Actor {
 	public void moveMe(View view, float accelX, float accelY) {
 		Log.d("Sweeper", "moveMe");
 
-		this.accelerate(accelX, accelY);
+		if (ACCELEROMETER) {
+			this.accelerate(accelX, accelY);
+		}
 		
 		int width = view.getWidth();
 		int height = view.getHeight();
-		float dx = this.x + this.velocityX;
-		float dy = this.y + this.velocityY;
+		float newX = this.x + this.velocityX;
+		float newY = this.y + this.velocityY;
 
-		if (dx > width || dx < 0) {
-			dx = this.x;
+		if (newX > width || newX < 0) {
+			if (!ACCELEROMETER) {
+				this.velocityX = -this.velocityX;
+			}
+			newX = this.x;
 		}
 		
-		if (dy > height || dy < 0) {
-			dy = this.y;
+		if (newY > height || newY < 0) {
+			if (!ACCELEROMETER) {
+				this.velocityY = -this.velocityY;
+			}
+			newY = this.y;
 		}
 				
-		this.x = dx;
-		this.y = dy;
+		this.x = newX;
+		this.y = newY;
 		
 		Log.d("Sweeper", "size: " + this.coordinates.size());
 		synchronized(this.coordinates) {
 			this.coordinates.add(new PointF(this.x, this.y));
 			if (this.coordinates.size() > 150) {
-				 new WebServicesTask().execute(new GameFrame(gameID, (ArrayList<PointF>) coordinates.clone()));
+				 new PostDataTask().execute(new GameFrame(this.gameID, (ArrayList<PointF>) coordinates.clone()));
 				 this.coordinates.clear();
 			}
 		}
 	}
 	
-	private class GameFrame {
-		public int gameID;
-		public ArrayList<PointF> coords;
-		
-		public GameFrame(int gameID, ArrayList<PointF> coords) {
-			this.coords = coords;
-			this.gameID = gameID;
-		}
-		
+	public void setGameID(int gameID) {
+		this.gameID = gameID;
 	}
-	
+
 	public ArrayList<PointF> getCoords() {
 		return this.coordinates;
 	}
@@ -96,68 +103,5 @@ public class Sweeper extends Actor {
 		this.velocityX = -accelX;
 		this.velocityY = accelY;
 	}
-
-	private class WebServicesTask extends AsyncTask<GameFrame, Integer, Long > {
-
-		private static final String TAG = "WebServicesTask";
-		
-		@Override
-		protected Long doInBackground(GameFrame...frame) {
-			Log.d(TAG, "do it in the background");
-			boolean succcess = this.postData(frame[0]);
-			return null;
-		} 
-
-		private boolean postData(GameFrame myFrame) {
-			Log.d(TAG, "post, data");
-			
-		    // Create a new HttpClient and Post Header
-		    HttpClient httpclient = new DefaultHttpClient();
-		    HttpPost httppost = new HttpPost("http://www.touchenabledweb.com/games/add.json");
-		    try {
-		   
-		        // Add your data
-		        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-		        nameValuePairs.add(new BasicNameValuePair("data[GameTimer][game_id]", String.valueOf(myFrame.gameID)));
-		        String xs = "";
-		        String ys = "";
-		        for (PointF p : myFrame.coords) {		        	
-			        xs += String.valueOf(p.x) + "|";
-			        ys += String.valueOf(p.y) + "|";
-		    	}
-		        nameValuePairs.add(new BasicNameValuePair("data[GameTimer][xs]", xs));
-		        nameValuePairs.add(new BasicNameValuePair("data[GameTimer][ys]", ys));
-		        Log.d(TAG, "xs: " + xs);
-
-		        httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-		        
-		        // Execute HTTP Post Request
-		        HttpResponse response = httpclient.execute(httppost);
-		        Log.d(TAG, "RESPONSE: " + response.getEntity().getContent());
-		        BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF_8"));
-		        Log.d(TAG, "LINE: " + reader.readLine());
-		        StringBuilder builder = new StringBuilder();
-		        for (String line = null; (line = reader.readLine()) != null;) {
-		            builder.append(line).append("\n");
-		        }
-		        String json = builder.toString();
-		        JSONTokener tokener = new JSONTokener(json);
-		        try {
-					JSONArray finalResult = new JSONArray(tokener);
-				} catch (JSONException e) {
-			        Log.d(TAG, "This is your BROKEN (JSON)" + e.getMessage());
-					e.printStackTrace();
-				}
-		        Log.d(TAG, "This is your response (JSON)" + json);
-		        Log.d(TAG, "This is your response " + response.getEntity().getContent().toString());
-		    } catch (ClientProtocolException e) {
-		        Log.d(TAG, "This is your error ClientProtocol " + e.getLocalizedMessage());
-		    } catch (IOException e) {
-		    	e.printStackTrace();
-		        Log.d(TAG, "Thi is your IOException error " +  e.getLocalizedMessage());
-		    }
-		    
-		    return true;
-		}
-	}
+	
 }

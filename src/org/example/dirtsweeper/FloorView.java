@@ -91,7 +91,7 @@ public class FloorView extends View { // implements SensorEventListener {
 		}
 		this.actors.add(new Mouse(width*4.5f, height*4.5f, circleWidth, Color.GRAY));
 		this.actors.add(new Mouse(width*2.5f, height*1.5f, circleWidth, Color.GRAY));
-		this.sweeper = new Sweeper(width*2.5f, height*2.5f, circleWidth, Color.BLACK);
+		this.sweeper = new Sweeper(width*2.5f, height*2.5f, circleWidth, Color.BLACK, this);
 		this.actors.add(this.sweeper);
 	}
 	
@@ -154,25 +154,6 @@ public class FloorView extends View { // implements SensorEventListener {
 	public void onPause() {
 		unregisterListener();
 	}
-	
-	/*
-	private void initThreading() {
-		guiThread = new Handler();
-		webServicesThread = Executors.newSingleThreadExecutor();
-		updateTask = new Runnable() {
-			public void run() {
-				try {
-					WebServicesTask sendCoordsTask = new WebServicesTask(this, null, selX);
-					webServicesThread.submit(sendCoordsTask);
-				} catch (RejectedExecutionException e) {
-					
-					
-				}
-				
-				
-			}
-		};
-	}
-	*/
+
 }
 

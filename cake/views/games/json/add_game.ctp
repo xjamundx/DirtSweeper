@@ -1,0 +1,1 @@
+<?php echo json_encode(array('success' => $success, 'game_id' => $gameID)); ?>
